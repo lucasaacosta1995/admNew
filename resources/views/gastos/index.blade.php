@@ -2,6 +2,10 @@
 
 @section('content')
     <div class="row">
+        <div class="col-md" id="countGastosPisos">
+        </div>
+    </div>
+    <div class="row">
         <div class="col-md">
             <div class="card">
                 <div class="card-body">
@@ -23,6 +27,7 @@
                                     <th>Piso</th>
                                     <th>Fecha</th>
                                     <th>Resposable</th>
+                                    <th>Importe</th>
                                     <th>Fecha de creacion</th>
                                     <th>Acciones</th>
                                 </tr>
@@ -52,6 +57,12 @@
                         <div class="form-group">
                             <label>Titulo</label>
                             <input class="form-control" name="titulo" type="text" required>
+                        </div>
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">$</span>
+                            </div>
+                            <input type="number" step="0.01" name="importe" required class="form-control"  aria-label="Amount (to the nearest dollar)">
                         </div>
                         <div class="form-group">
                             <label>Fecha realizado</label>
@@ -103,6 +114,12 @@
                             <label>Titulo</label>
                             <input class="form-control" name="titulo" type="text" id="editTitulo" required>
                         </div>
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">$</span>
+                            </div>
+                            <input type="number" step="0.01" id="editImporte" name="importe" required class="form-control"  aria-label="Amount (to the nearest dollar)">
+                        </div>
                         <div class="form-group">
                             <label>Fecha realizado</label>
                             <input class="form-control" name="fecha" type="date" id="editFecha" required>
@@ -140,8 +157,9 @@
     <script>
         $(document).ready(function() {
             $('#tablaGastosIndex').DataTable({
-                ajax:'{{ url('/') }}/getAll'
+                ajax:'{{ url('gastosC/getAll') }}'
             });
+            getCountPisosImporte();
         } );
         $("#formCrearGasto").submit(function(stay){
             stay.preventDefault();
@@ -178,8 +196,26 @@
                 },
             });
         });
+        function getCountPisosImporte(){
+            $("#countGastosPisos").html('');
+            $.ajax({
+                type: 'GET',
+                url: "{{ url('gastosC/importesTotalesPisos') }}",
+                data: {}, // here $(this) refers to the ajax object not form
+                success: function (response) {
+                    var data = JSON.parse(response);
+                    if(data.status){
+                        $.each(data.data,function(e,i){
+                            var html = '<button type="button" class="btn btn-raised btn-secondary">Piso Nº '+e+' | $'+i+'</button> ';
+                            $("#countGastosPisos").append(html);
+                        });
+                    }
+                },
+            });
+        }
         function recargarTableGastos(){
             $('#tablaGastosIndex').DataTable().ajax.reload();
+            getCountPisosImporte();
         }
         function changeGasto(id){
             $('#formEditGasto')[0].reset();
@@ -197,6 +233,7 @@
                         $("#editPiso").val(data.gasto.piso);
                         $("#editFecha").val(data.gasto.fecha);
                         $("#editReponsable").val(data.gasto.responsable);
+                        $("#editImporte").val(data.gasto.importe);
                         $('#editNewGasto').modal('show');
                     }
                 },

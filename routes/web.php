@@ -22,4 +22,5 @@ Auth::routes();
 
 Route::resource('gastos', 'GastoController');
 
-Route::get('/getAll', 'GastoController@getAll');
+Route::get('/gastosC/getAll', 'GastoController@getAll');
+Route::get('/gastosC/importesTotalesPisos', 'GastoController@getCountPorPiso');

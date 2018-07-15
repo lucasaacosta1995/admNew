@@ -25,9 +25,25 @@ class GastoController extends Controller
         return view('gastos.index')->with('gastos',$gastosAll);
     }
 
+    public function getCountPorPiso(){
+        $gastosAll = Gasto::all();
+        $response = array('status'=>false,'data'=>array());
+        foreach ($gastosAll as $gastoTmp ){
+            $response['status'] = true;
+            if(!isset($response['data'][$gastoTmp->piso])){
+                $response['data'][$gastoTmp->piso] = $gastoTmp->importe;
+            }
+            else{
+                $response['data'][$gastoTmp->piso] += $gastoTmp->importe;
+            }
+        }
+        echo json_encode($response);
+        exit();
+    }
+
     public function getAll(){
         $gastosAll = Gasto::all();
-        $response = array('data');
+        $response = array('data'=>array());
         foreach ($gastosAll as $gastoTmp ){
             $dateFecha = date('Y-m-d',strtotime($gastoTmp->fecha));
             $botones =
@@ -39,6 +55,7 @@ class GastoController extends Controller
                 $gastoTmp->piso,
                 $dateFecha,
                 $gastoTmp->responsable,
+                $gastoTmp->importe,
                 $gastoTmp->created_at->format('Y-m-d'),
                 $botones
             );
@@ -72,6 +89,7 @@ class GastoController extends Controller
         $newGasto->descripcion = $request->descripcion;
         $newGasto->fecha = $request->fecha;
         $newGasto->responsable = $request->responsable;
+        $newGasto->importe = $request->importe;
         $newGasto->creado_por = Auth::user()->id;
         if($newGasto->save()){
             $return['status'] = true;
@@ -128,6 +146,7 @@ class GastoController extends Controller
             $gasto->descripcion = $request->descripcion;
             $gasto->fecha = $request->fecha;
             $gasto->responsable = $request->responsable;
+            $gasto->importe = $request->importe;
             $gasto->modificado_por = Auth::user()->id;
             if($gasto->save()){
                 $return['status'] = true;
