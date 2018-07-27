@@ -25,6 +25,31 @@ class GastoController extends Controller
         return view('gastos.index')->with('gastos',$gastosAll);
     }
 
+    public function getGastosPorFecha(Request $request){
+        $returnData = array();
+        $gastosAll = Gasto::query();
+        $gastosAll->where('status',1);
+        if(isset($request->fecha_desde) && !is_null($request->fecha_desde)){
+            $gastosAll->where('fecha','>=',$request->fecha_desde);
+        }
+        if(isset($request->fecha_hasta) && !is_null($request->fecha_hasta)){
+            $gastosAll->where('fecha','<=',$request->fecha_hasta);
+        }
+        if(isset($request->piso) && !is_null($request->piso)){
+            $gastosAll->where('piso',$request->piso);
+        }
+        $result = $gastosAll->get();
+        $total = 0;
+        foreach ($result as $gastoTemp){
+            $total = $total + $gastoTemp->importe;
+        }
+        $total = number_format($total, 2, '.', '');
+        $returnData['total'] = $total;
+        $returnData['data'] = $result;
+        echo json_encode($returnData);
+        exit();
+    }
+
     public function getCountPorPiso(){
         $gastosAll = Gasto::all();
         $response = array('status'=>false,'data'=>array());

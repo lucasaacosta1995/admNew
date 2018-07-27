@@ -24,3 +24,4 @@ Route::resource('gastos', 'GastoController');
 
 Route::get('/gastosC/getAll', 'GastoController@getAll');
 Route::get('/gastosC/importesTotalesPisos', 'GastoController@getCountPorPiso');
+Route::get('/gastosC/gastosPorFecha', 'GastoController@getGastosPorFecha');

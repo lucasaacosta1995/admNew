@@ -11,9 +11,14 @@
                 <div class="card-body">
                     <h5 class="card-title">Gastos</h5>
                     <div class="row">
-                        <div class="col-md">
+                        <div class="col-md-2">
                             <button type="button" class="btn btn-raised btn-sm btn-success" data-toggle="modal" data-target="#addNewGasto" onclick="$('#formCrearGasto')[0].reset();">
                                 Agregar gasto
+                            </button>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" class="btn btn-raised btn-sm btn-info" data-toggle="modal" data-target="#verGastosPorFecha">
+                                Ver gastos por fecha
                             </button>
                         </div>
                     </div>
@@ -152,6 +157,76 @@
             </div>
         </div>
     </div>
+    <!-- Modal ver gastos por fecha y piso-->
+    <div class="modal fade" id="verGastosPorFecha" tabindex="-1" role="dialog" aria-labelledby="verGastosPorFechaLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editNewGastoLabel">Ver gastos por fecha</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form id="formVerGastosPorFecha" action="#">
+                    {{ csrf_field() }}
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="form-group">
+                                <label>Fecha desde</label>
+                                <input class="form-control" name="fecha_desde" type="date" id="fechaDesde" >
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group">
+                                <label>Fecha hasta</label>
+                                <input class="form-control" name="fecha_hasta" type="date" id="fechaHasta" >
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group">
+                                <label>Piso</label>
+                                <select class="form-control" name="piso" id="editPiso" required>
+                                    <option>1</option>
+                                    <option>2</option>
+                                    <option>3</option>
+                                    <option>4</option>
+                                    <option>5</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group">
+                                <button id="resultadoGastosPorFecha" type="button" class="btn btn-raised btn-secondary">Resultado </button>
+                            </div>
+                        </div>
+                        <div class="row" style="display: none;" id="contenedorTableShowResultadoPorFecha">
+                            <div class="col-md table-responsive">
+                                <table id="tableShowResultadoPorFecha" class="table table-striped table-bordered" style="width:100%">
+                                    <thead>
+                                    <tr>
+                                        <th>Titulo</th>
+                                        <th>Descripcion</th>
+                                        <th>Piso</th>
+                                        <th>Fecha</th>
+                                        <th>Resposable</th>
+                                        <th>Importe</th>
+                                        <th>Fecha de creacion</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody id="trDataGastos">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" data-dismiss="modal">Salir</button>
+                        <button type="submit" class="btn btn-primary">Buscar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 @endsection
 @section('scripts')
     <script>
@@ -194,6 +269,43 @@
                         recargarTableGastos();
                     }
                 },
+            });
+        });
+        $("#formVerGastosPorFecha").submit(function(stay){
+            stay.preventDefault();
+            $("#tableShowResultadoPorFecha tbody").html('');
+            $("#countGastosPisos").html('');
+            var formdata = $(this).serialize(); // here $(this) refere to the form its submitting
+            $.ajax({
+                type: 'GET',
+                url: "{{ url('gastosC/gastosPorFecha') }}",
+                data: formdata, // here $(this) refers to the ajax object not form
+                success: function (response) {
+                    var data = JSON.parse(response);
+                    if(data.total == 0){
+                        $('#resultadoGastosPorFecha').html('Sin gastos para mostrar');
+                    }
+                    else{
+                        $('#resultadoGastosPorFecha').html('Resultado $'+data.total);
+                        $("#contenedorTableShowResultadoPorFecha").show();
+
+                        $.each(data.data,function(e,i){
+                           var html =   "<tr>"+
+                                            "<td>"+i.titulo+"</td>"+
+                                            "<td>"+i.descripcion+"</td>"+
+                                            "<td>"+i.piso+"</td>"+
+                                            "<td>"+i.fecha+"</td>"+
+                                            "<td>"+i.responsable+"</td>"+
+                                            "<td>"+i.importe+"</td>"+
+                                            "<td>"+i.created_at+"</td>"+
+                                        "</tr>";
+
+                            $("#tableShowResultadoPorFecha tbody").append(html);
+                            $("#countGastosPisos").append(html);
+                        });
+                        $("#tableShowResultadoPorFecha").show();
+                    }
+                }
             });
         });
         function getCountPisosImporte(){
