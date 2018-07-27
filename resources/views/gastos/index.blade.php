@@ -274,7 +274,8 @@
         $("#formVerGastosPorFecha").submit(function(stay){
             stay.preventDefault();
             $("#tableShowResultadoPorFecha tbody").html('');
-            $("#countGastosPisos").html('');
+            $("#tableShowResultadoPorFecha").hide('');
+            $('#resultadoGastosPorFecha').html('');
             var formdata = $(this).serialize(); // here $(this) refere to the form its submitting
             $.ajax({
                 type: 'GET',
@@ -301,7 +302,6 @@
                                         "</tr>";
 
                             $("#tableShowResultadoPorFecha tbody").append(html);
-                            $("#countGastosPisos").append(html);
                         });
                         $("#tableShowResultadoPorFecha").show();
                     }
